@@ -2,13 +2,13 @@ import { JsonController, Get, Param, Post, Put, Delete, Body, OnUndefined, HttpC
 import { ICategory } from '../../interface/interface';
 import { setRedisData, getRedisData, updateRedisData, deleteRedisData } from '../../db/redis.js';
 import Category from './category.schema.js';
-import authMiddleware from '../../middleware/auth';
+import authMiddleware from '../../middleware/auth.js';
 
+const redisKey = process.env.allCategories as string | 'allCategories';
 @JsonController('/categories')
 export class CategoryController {
     @Get('/')
     async getAllCategories(): Promise<ICategory[]> {
-        const redisKey = 'allCategories';
         let categories = await getRedisData(redisKey);
 
         if (!categories) {
@@ -36,9 +36,8 @@ export class CategoryController {
 
         return category;
     }
-
     @Post('/')
-    @UseBefore(authMiddleware)
+    // @UseBefore(authMiddleware)
     @HttpCode(201)
     async createCategory(@Body() categoryData: ICategory): Promise<ICategory> {
         try {
@@ -47,11 +46,10 @@ export class CategoryController {
 
             // Barcha Category ma'lumotlarini qayta yozish
             const categories = await Category.find();
-            await setRedisData('allCategories', categories);
+            await setRedisData(redisKey, categories);
 
             // Yangi ma'lumotni qayta Redisga yozish
             await setRedisData(`category:${savedCategory._id}`, savedCategory.toObject());
-
             return savedCategory.toObject();
         } catch (error: any) {
             // Xatoni console logga chiqarish
@@ -63,7 +61,6 @@ export class CategoryController {
 
     @Put('/:id')
     @UseBefore(authMiddleware)
-
     async updateCategory(@Param('id') id: string, @Body() categoryData: ICategory): Promise<ICategory> {
         const category = await Category.findByIdAndUpdate(id, categoryData, { new: true });
         if (!category) {
@@ -72,7 +69,7 @@ export class CategoryController {
 
         // Barcha Category ma'lumotlarini qayta yozish
         const categories = await Category.find();
-        await setRedisData('allCategories', categories);
+        await setRedisData(redisKey, categories);
 
         // Yangilangan ma'lumotni qayta Redisga yozish
         await setRedisData(`category:${id}`, category.toObject());
@@ -91,10 +88,10 @@ export class CategoryController {
 
         // Barcha Category ma'lumotlarini qayta yozish
         const categories = await Category.find();
-        await setRedisData('allCategories', categories);
+        await setRedisData(redisKey, categories);
 
         // Redisdan o'chirilgan ma'lumotni olib tashlash
-        const redisKey = `category:${id}`;
-        await deleteRedisData(redisKey);
+        const redisKeyDel = `category:${id}`;
+        await deleteRedisData(redisKeyDel);
     }
 }

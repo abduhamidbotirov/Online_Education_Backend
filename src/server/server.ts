@@ -8,6 +8,7 @@ import indexRouter from "../modules/index.routes.js"
 import { createExpressServer } from 'routing-controllers';
 import { CategoryController } from '../modules/Category/category.contr.js';
 import errorMiddleware from '../middleware/errorHandler.js';
+import { VideoController } from '../modules/Video/video.contr.js';
 const app: Application = express();
 const PORT: number = Number(process.env.PORT) || 5000;
 
@@ -22,7 +23,7 @@ app.use(express.static(`${process.cwd()}/src/public`));
 app.use("/api", indexRouter)
 // Routing-controllers orqali RESTful API endpointlarini tayyorlash
 app.use('/api', createExpressServer({
-  controllers: [CategoryController], 
+  controllers: [CategoryController, VideoController],
 }));
 
 // Bosh sahifa uchun ro'yxat

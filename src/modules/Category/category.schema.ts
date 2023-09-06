@@ -23,5 +23,9 @@ categorySchema.set('toObject', {
         ret._id = ret._id.toString();
     },
 });
+categorySchema.pre<ICategory>('save', function (next) {
+    this._id = this._id.toString();
+    next();
+});
 // Create and export the Category model
 export default mongoose.model<ICategory>('Category', categorySchema);

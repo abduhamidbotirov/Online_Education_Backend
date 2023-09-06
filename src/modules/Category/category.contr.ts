@@ -38,12 +38,13 @@ export class CategoryController {
         return category;
     }
     @Post('/')
-    // @UseBefore(authMiddleware)
+    @UseBefore(authMiddleware)
     @HttpCode(201)
     async createCategory(@Body() { catName }: ICategory): Promise<ICategory> {
         try {
             const category = new Category({ catName });
             let savedCategory = await category.save();
+            console.log('await category.save() :', typeof (await category.save())._id);
 
             // Barcha Category ma'lumotlarini qayta yozish
             const categories = await Category.find();

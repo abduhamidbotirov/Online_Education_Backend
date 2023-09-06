@@ -6,5 +6,5 @@ export interface IPost extends Document {
 }
 export interface ICategory extends Document {
     catName: string;
-    videosId: Types.ObjectId[] | Array<Types.ObjectId>;
+    videosId?: Types.ObjectId[] | Array<Types.ObjectId>;
 }

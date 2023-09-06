@@ -1,11 +1,12 @@
 import { JsonController, Get, Param, Post, Put, Delete, Body, OnUndefined, HttpCode, UseBefore } from 'routing-controllers';
 import { ICategory } from '../../interface/interface';
-import { setRedisData, getRedisData, updateRedisData, deleteRedisData } from '../../db/redis.js';
+import { setRedisData, getRedisData, deleteRedisData } from '../../db/redis.js';
 import Category from './category.schema.js';
 import authMiddleware from '../../middleware/auth.js';
-
+import { ErrorHandlerMiddleware } from '../../middleware/errorHandlerDecoratir.js';
 const redisKey = process.env.allCategories as string | 'allCategories';
 @JsonController('/categories')
+@UseBefore(ErrorHandlerMiddleware)
 export class CategoryController {
     @Get('/')
     async getAllCategories(): Promise<ICategory[]> {
@@ -39,9 +40,9 @@ export class CategoryController {
     @Post('/')
     // @UseBefore(authMiddleware)
     @HttpCode(201)
-    async createCategory(@Body() categoryData: ICategory): Promise<ICategory> {
+    async createCategory(@Body() { catName }: ICategory): Promise<ICategory> {
         try {
-            const category = new Category(categoryData);
+            const category = new Category({ catName });
             let savedCategory = await category.save();
 
             // Barcha Category ma'lumotlarini qayta yozish
@@ -52,10 +53,7 @@ export class CategoryController {
             await setRedisData(`category:${savedCategory._id}`, savedCategory.toObject());
             return savedCategory.toObject();
         } catch (error: any) {
-            // Xatoni console logga chiqarish
-            console.error('Kategoriyani yaratishda xatolik yuz berdi:', error.message);
-
-            throw new Error('Kategoriyani yaratishda xatolik yuz berdi');
+            throw new Error(error.message);
         }
     }
 

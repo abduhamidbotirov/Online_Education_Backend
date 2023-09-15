@@ -9,13 +9,13 @@ const categorySchema = new Schema<ICategory>(
         videosId: [
             {
                 type: Schema.Types.ObjectId,
-                ref: 'Video', // Replace 'Video' with the actual model name for videos
+                ref: 'Video',
                 required: true,
             },
         ],
     },
     {
-        timestamps: true, // Add timestamps for createdAt and updatedAt fields
+        timestamps: true,
     }
 );
 categorySchema.set('toObject', {
